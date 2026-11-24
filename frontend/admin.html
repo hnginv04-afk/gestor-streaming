@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Administración — Gestor Streaming</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- Estilos Personalizados -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Navbar Admin -->
+  <nav class="navbar navbar-expand-lg bg-white border-bottom py-3 sticky-top">
+    <div class="container-fluid px-lg-5">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="admin.html">
+        <i class="bi bi-shield-check text-primary fs-3"></i>
+        <span>Panel Administrador</span>
+        <span class="badge bg-dark rounded-pill px-2 py-1 small">Vendedor</span>
+      </a>
+      <div class="d-flex align-items-center gap-2">
+        <a href="index.html" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+          <i class="bi bi-box-arrow-up-right me-1"></i> Vista Cliente
+        </a>
+        <a href="http://127.0.0.1:8000/admin/" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+          <i class="bi bi-gear-fill me-1"></i> Django Admin
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid px-lg-5 py-4">
+
+    <!-- Tarjetas de Métricas Resumen -->
+    <div class="row g-3 mb-4">
+      <div class="col-sm-6 col-xl-3">
+        <div class="custom-card p-3 border-start border-primary border-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <p class="text-muted small mb-1 fw-semibold">Cobrado este Mes</p>
+              <h3 class="fw-bold mb-0 text-primary" id="metricTotalMes">$0.00</h3>
+            </div>
+            <div class="bg-primary-subtle text-primary p-3 rounded-circle">
+              <i class="bi bi-cash-stack fs-4"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-xl-3">
+        <div class="custom-card p-3 border-start border-success border-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <p class="text-muted small mb-1 fw-semibold">Suscripciones al Día</p>
+              <h3 class="fw-bold mb-0 text-success" id="metricAlDia">0</h3>
+            </div>
+            <div class="bg-success-subtle text-success p-3 rounded-circle">
+              <i class="bi bi-check-circle-fill fs-4"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-xl-3">
+        <div class="custom-card p-3 border-start border-warning border-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <p class="text-muted small mb-1 fw-semibold">Por Vencer (≤ 3 días)</p>
+              <h3 class="fw-bold mb-0 text-warning" id="metricPorVencer">0</h3>
+            </div>
+            <div class="bg-warning-subtle text-warning p-3 rounded-circle">
+              <i class="bi bi-hourglass-split fs-4"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-xl-3">
+        <div class="custom-card p-3 border-start border-danger border-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <p class="text-muted small mb-1 fw-semibold">Suscripciones Vencidas</p>
+              <h3 class="fw-bold mb-0 text-danger" id="metricVencidas">0</h3>
+            </div>
+            <div class="bg-danger-subtle text-danger p-3 rounded-circle">
+              <i class="bi bi-exclamation-octagon-fill fs-4"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navegación por Pestañas -->
+    <ul class="nav nav-pills mb-4 gap-2 border-bottom pb-3" id="adminTabs" role="tablist">
+      <li class="nav-item">
+        <button class="nav-link active rounded-pill fw-semibold" id="tabCobrosBtn" data-bs-toggle="pill" data-bs-target="#tabCobros">
+          <i class="bi bi-calendar-check me-1"></i> Panel de Cobros
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link rounded-pill fw-semibold position-relative" id="tabVerificarBtn" data-bs-toggle="pill" data-bs-target="#tabVerificar">
+          <i class="bi bi-receipt me-1"></i> Pagos por Verificar
+          <span class="badge bg-danger rounded-pill ms-1" id="badgePendingCount">0</span>
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link rounded-pill fw-semibold" id="tabCuentasBtn" data-bs-toggle="pill" data-bs-target="#tabCuentas">
+          <i class="bi bi-hdd-network me-1"></i> Cuentas Maestras & Cupos
+        </button>
+      </li>
+    </ul>
+
+    <!-- Contenido de las Pestañas -->
+    <div class="tab-content">
+
+      <!-- PESTAÑA 1: PANEL DE COBROS -->
+      <div class="tab-pane fade show active" id="tabCobros">
+        <!-- Controles de Filtros y Búsqueda -->
+        <div class="custom-card p-3 mb-4">
+          <div class="row g-2 align-items-center justify-content-between">
+            <div class="col-md-5">
+              <div class="input-group">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" id="filterSearch" class="form-control border-start-0 shadow-none" placeholder="Buscar por cliente o teléfono...">
+              </div>
+            </div>
+            <div class="col-md-7 d-flex flex-wrap gap-2 justify-content-md-end">
+              <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-secondary active btn-filter" data-estado="">Todos</button>
+                <button type="button" class="btn btn-outline-danger btn-filter" data-estado="Vencido">Vencidos</button>
+                <button type="button" class="btn btn-outline-warning btn-filter" data-estado="Por vencer">Por vencer</button>
+                <button type="button" class="btn btn-outline-success btn-filter" data-estado="Al día">Al día</button>
+              </div>
+              <button class="btn btn-light border" id="btnRefreshCobros">
+                <i class="bi bi-arrow-clockwise"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabla de Suscripciones -->
+        <div class="custom-card p-0 overflow-hidden">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light small text-muted text-uppercase">
+                <tr>
+                  <th class="ps-4">Cliente / Teléfono</th>
+                  <th>Servicio & Perfil</th>
+                  <th>Fecha de Corte</th>
+                  <th>Estado</th>
+                  <th class="text-end pe-4">Acciones de Cobro</th>
+                </tr>
+              </thead>
+              <tbody id="cobrosTableBody">
+                <!-- Filas renderizadas dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PESTAÑA 2: PAGOS POR VERIFICAR -->
+      <div class="tab-pane fade" id="tabVerificar">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0"><i class="bi bi-clock-history text-warning me-2"></i>Comprobantes Reportados por Clientes</h5>
+          <button class="btn btn-sm btn-outline-secondary rounded-pill" id="btnRefreshPagos">
+            <i class="bi bi-arrow-clockwise me-1"></i> Actualizar
+          </button>
+        </div>
+
+        <div id="pagosPendientesContainer" class="row g-3">
+          <!-- Tarjetas renderizadas dinámicamente -->
+        </div>
+      </div>
+
+      <!-- PESTAÑA 3: CUENTAS MAESTRAS -->
+      <div class="tab-pane fade" id="tabCuentas">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0"><i class="bi bi-collection-play text-primary me-2"></i>Cuentas Maestras y Capacidad de Cupos</h5>
+        </div>
+
+        <div id="cuentasMaestrasContainer" class="row g-3">
+          <!-- Tarjetas renderizadas dinámicamente -->
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Modal: Registrar Pago Manual (+30 días) -->
+  <div class="modal fade" id="manualPayModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content custom-card border-0 p-3">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold">
+            <i class="bi bi-check2-circle text-success me-2"></i>Marcar como Pagado (+30 días)
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted small mb-3">
+            Registra un cobro externo o en efectivo. Al confirmar, la suscripción sumará 30 días automáticamente y pasará al estado "Al día".
+          </p>
+
+          <form id="manualPayForm">
+            <input type="hidden" id="manualSubId">
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Suscripción</label>
+              <input type="text" id="manualSubDisplay" class="form-control bg-light" readonly>
+            </div>
+
+            <div class="row g-2 mb-3">
+              <div class="col-sm-6">
+                <label class="form-label small fw-semibold">Monto ($)</label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input type="number" step="0.01" min="0.01" class="form-control" id="manualMonto" required>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <label class="form-label small fw-semibold">Referencia (Opcional)</label>
+                <input type="text" class="form-control" id="manualReferencia" placeholder="Efectivo / Zelle">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Notas</label>
+              <input type="text" class="form-control" id="manualNotas" placeholder="Cobrado por WhatsApp / Efectivo">
+            </div>
+
+            <div class="d-grid mt-4">
+              <button type="submit" id="btnConfirmManualPay" class="btn btn-success py-2 fw-semibold">
+                Confirmar Renovación (+30 días)
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Scripts del Panel -->
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
