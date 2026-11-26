@@ -3,6 +3,7 @@ import re
 from decimal import Decimal
 from urllib.parse import quote
 from datetime import date
+from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -33,7 +34,7 @@ def serialize_suscripcion(sub):
         f"Hola {sub.cliente.nombre}! 👋 Te saludamos de tu servicio de streaming. "
         f"Te recordamos que tu pantalla de *{sub.cuenta_maestra.plataforma}* ({sub.perfil_pin}) "
         f"vence el *{sub.fecha_vencimiento.strftime('%d/%m/%Y')}* (Monto: ${sub.precio}).\n\n"
-        f"Puedes consultar tus datos y reportar tu pago aquí: https://gestorstreaming.netlify.app/\n"
+        f"Puedes consultar tus datos y reportar tu pago aquí: {settings.FRONTEND_URL}/\n"
         f"¡Gracias por tu preferencia!"
     )
     whatsapp_url = f"https://wa.me/{tel_limpio}?text={quote(texto_whatsapp)}"
