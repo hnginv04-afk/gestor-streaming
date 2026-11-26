@@ -73,3 +73,19 @@ class ConfigYSeedTestCase(TestCase):
         resumen = client.get("/api/admin/resumen/")
         self.assertEqual(resumen.status_code, 200)
         self.assertEqual(resumen.json()["total_suscripciones"], 2)
+
+    def test_ruta_raiz_devuelve_200_html_y_json(self):
+        client = Client()
+        resp_html = client.get("/")
+        self.assertEqual(resp_html.status_code, 200)
+        body = resp_html.content.decode("utf-8")
+        self.assertIn("Gestor Streaming", body)
+        self.assertIn(settings.FRONTEND_URL, body)
+        self.assertIn("/admin/", body)
+        self.assertIn("/api/admin/resumen/", body)
+
+        resp_json = client.get("/", HTTP_ACCEPT="application/json")
+        self.assertEqual(resp_json.status_code, 200)
+        data = resp_json.json()
+        self.assertEqual(data["status"], "ok")
+        self.assertEqual(data["frontend_url"], settings.FRONTEND_URL)
