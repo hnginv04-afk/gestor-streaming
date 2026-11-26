@@ -1,8 +1,11 @@
+import os
 from pathlib import Path
 from decimal import Decimal
 from datetime import timedelta
+from unittest.mock import patch
 from urllib.parse import unquote
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.test import TestCase, Client, override_settings
 from django.utils import timezone
@@ -89,3 +92,30 @@ class ConfigYSeedTestCase(TestCase):
         data = resp_json.json()
         self.assertEqual(data["status"], "ok")
         self.assertEqual(data["frontend_url"], settings.FRONTEND_URL)
+
+    def test_ensure_superuser_omite_si_faltan_variables(self):
+        User = get_user_model()
+        with patch.dict(os.environ, {}, clear=True):
+            call_command("ensure_superuser")
+        self.assertEqual(User.objects.count(), 0)
+
+    def test_ensure_superuser_crea_idempotente_desde_entorno(self):
+        User = get_user_model()
+        cmd_path = Path(settings.BASE_DIR) / "suscripciones" / "management" / "commands" / "ensure_superuser.py"
+        cmd_source = cmd_path.read_text(encoding="utf-8")
+        self.assertNotIn("admin123", cmd_source)
+
+        env_vars = {
+            "DJANGO_SUPERUSER_USERNAME": "supertest",
+            "DJANGO_SUPERUSER_EMAIL": "supertest@example.com",
+            "DJANGO_SUPERUSER_PASSWORD": "TestPassSynthetic#99",
+        }
+        with patch.dict(os.environ, env_vars):
+            call_command("ensure_superuser")
+            call_command("ensure_superuser")
+
+        self.assertEqual(User.objects.filter(username="supertest").count(), 1)
+        user = User.objects.get(username="supertest")
+        self.assertTrue(user.is_superuser)
+        self.assertTrue(user.is_staff)
+        self.assertTrue(user.check_password("TestPassSynthetic#99"))
