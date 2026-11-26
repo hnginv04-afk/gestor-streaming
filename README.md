@@ -25,30 +25,46 @@ Plataforma web integral orientada a la administración organizada, automatizada 
 
 ```text
 gestor-streaming/
-├── backend/                  # Código fuente del Back-End (Django)
-│   ├── config/               # Configuración central del proyecto Django (settings, urls, wsgi)
-│   ├── .env.example          # Plantilla de variables de entorno requeridas
-│   ├── requirements.txt      # Dependencias de paquetes de Python
-│   └── manage.py             # Script de administración de Django
-├── frontend/                 # Código fuente del Front-End (Cliente y Admin)
-│   ├── assets/               # Hojas de estilo CSS personalizadas, scripts JS e imágenes
-│   └── index.html            # Interfaz de usuario para clientes y panel administrativo
-├── .gitignore                # Reglas de exclusión para Git (ignora .env, venv, sqlite3, etc.)
-└── README.md                 # Documentación principal del repositorio
+├── backend/                      # Código fuente del Back-End (Django + API REST)
+│   ├── config/                   # Configuración central (settings, urls, wsgi, asgi)
+│   ├── suscripciones/            # App principal: modelos, validaciones, API, admin y tests
+│   │   ├── management/commands/  # Comando idempotente seed_demo para datos iniciales
+│   │   └── tests/                # Suite de pruebas unitarias, integración y E2E
+│   ├── .env.example              # Plantilla de variables de entorno requeridas
+│   ├── build.sh                  # Script de compilación y migración para Render
+│   ├── requirements.txt          # Dependencias de paquetes de Python
+│   └── manage.py                 # Script de administración de Django
+├── frontend/                     # Código fuente del Front-End (Cliente y Admin)
+│   ├── css/                      # Hojas de estilo (styles.css con paleta oficial)
+│   ├── js/                       # Scripts de consumo de API (config, api, app, admin)
+│   ├── index.html                # Portal público para consulta y reporte del cliente
+│   └── admin.html                # Panel de administración, cobros y verificación
+├── .gitignore                    # Exclusión de venv, .env, db.sqlite3, node_modules, etc.
+├── netlify.toml                  # Configuración de publicación estática en Netlify
+├── render.yaml                   # Blueprint de servidor web + PostgreSQL en Render
+└── README.md                     # Documentación principal del repositorio
 ```
+
+---
+
+## 🌐 Despliegue en Vivo (Producción)
+
+- **Aplicación Web (Front-End en Netlify):** https://gestor-streaming-j1e6.netlify.app/
+- **API REST & Admin (Back-End en Render):** https://gestor-streaming-backend.onrender.com/
 
 ---
 
 ## ⚙️ Variables de Entorno Requeridas
 
-Las credenciales y configuraciones sensibles se gestionan en el archivo `backend/.env` (no incluido en el repositorio por motivos de seguridad). Se provee la plantilla `backend/.env.example` con las siguientes variables:
+Las credenciales y configuraciones sensibles se gestionan en el archivo `backend/.env` (ignorado en Git por seguridad). Se provee la plantilla `backend/.env.example` con las siguientes variables:
 
 | Variable | Descripción | Valor sugerido para desarrollo |
 | :--- | :--- | :--- |
-| `SECRET_KEY` | Clave criptográfica única de Django para firmas y sesiones. | Cadena aleatoria segura (e.g. `django-insecure-...`) |
+| `SECRET_KEY` | Clave criptográfica única de Django para firmas y sesiones. | Cadena aleatoria segura |
 | `DEBUG` | Indicador de modo depuración (`True` o `False`). | `True` |
 | `ALLOWED_HOSTS` | Lista de hosts/dominios permitidos separados por comas. | `localhost,127.0.0.1` |
 | `DATABASE_URL` | URL de conexión al motor de base de datos relacional. | `sqlite:///db.sqlite3` |
+| `FRONTEND_URL` | URL pública del Front-End incluida en enlaces de WhatsApp. | `https://gestor-streaming-j1e6.netlify.app` |
 
 ---
 
@@ -98,15 +114,21 @@ python manage.py runserver
 El Back-End estará disponible en: `http://127.0.0.1:8000/`  
 El panel de administración estará en: `http://127.0.0.1:8000/admin/`
 
-### 5. Visualizar el Front-End
-Puedes abrir el archivo `frontend/index.html` directamente en tu navegador o utilizando la extensión **Live Server** en Visual Studio Code.
+### 5. Ejecutar pruebas automatizadas
+```bash
+python manage.py test suscripciones -v 2
+```
+
+### 6. Visualizar el Front-End
+Puedes abrir el archivo `frontend/index.html` o `frontend/admin.html` en tu navegador (o mediante **Live Server** en Visual Studio Code).
 
 ---
 
 ## 📌 Convención de Commits
 Este repositorio sigue la especificación de **Conventional Commits**:
 - `feat:` Nuevas características o funcionalidades.
-- `fix:` Corrección de errores o bugs.
+- `fix:` Corrección de errores o configuración.
+- `test:` Creación o ampliación de pruebas automatizadas.
 - `docs:` Cambios o adiciones en documentación.
 - `chore:` Tareas rutinarias de configuración y mantenimiento.
 - `refactor:` Reestructuración de código sin alterar su comportamiento externo.
