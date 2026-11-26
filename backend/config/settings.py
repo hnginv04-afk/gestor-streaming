@@ -13,16 +13,21 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 import dj_database_url
+from dotenv import load_dotenv
+from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Carga variables de entorno locales desde .env si existe (sin exponer secretos en Git)
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-+1&e4v&8+$85x_w)#qzri#&j%)ua%^8-kg=0by-r=lv@vr4qu1')
+SECRET_KEY = os.environ.get('SECRET_KEY') or get_random_secret_key()
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 't')
@@ -146,4 +151,7 @@ CORS_ALLOW_CREDENTIALS = True
 # Media files (Comprobantes de pago)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# URL pública del Front-End (usada en recordatorios de WhatsApp)
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://gestor-streaming-j1e6.netlify.app').rstrip('/')
 
