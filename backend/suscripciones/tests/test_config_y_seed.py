@@ -119,3 +119,19 @@ class ConfigYSeedTestCase(TestCase):
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.is_staff)
         self.assertTrue(user.check_password("TestPassSynthetic#99"))
+
+    def test_frontend_enlace_django_admin_y_hero_h1_32px(self):
+        frontend_dir = Path(settings.BASE_DIR).parent / "frontend"
+        config_js = (frontend_dir / "js" / "config.js").read_text(encoding="utf-8")
+        admin_html = (frontend_dir / "admin.html").read_text(encoding="utf-8")
+        admin_js = (frontend_dir / "js" / "admin.js").read_text(encoding="utf-8")
+        styles_css = (frontend_dir / "css" / "styles.css").read_text(encoding="utf-8")
+        index_html = (frontend_dir / "index.html").read_text(encoding="utf-8")
+
+        self.assertIn("DJANGO_ADMIN_URL", config_js)
+        self.assertIn("https://gestor-streaming-backend.onrender.com/admin/", config_js)
+        self.assertIn('id="btnDjangoAdmin"', admin_html)
+        self.assertIn("DJANGO_ADMIN_URL", admin_js)
+        self.assertIn(".hero-title", styles_css)
+        self.assertIn("2rem", styles_css)
+        self.assertIn("hero-title", index_html)

@@ -1,6 +1,11 @@
 // Lógica interactiva del Panel Administrativo
 
 document.addEventListener('DOMContentLoaded', () => {
+  const btnDjangoAdmin = document.getElementById('btnDjangoAdmin');
+  if (btnDjangoAdmin && window.DJANGO_ADMIN_URL) {
+    btnDjangoAdmin.href = window.DJANGO_ADMIN_URL;
+  }
+
   // Elementos de métricas
   const metricTotalMes = document.getElementById('metricTotalMes');
   const metricAlDia = document.getElementById('metricAlDia');
